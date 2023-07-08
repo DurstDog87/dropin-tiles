@@ -1,11 +1,11 @@
-import { Pool, QueryResult, PoolConfig } from 'pg'
-import { ITileCoord, ITileEnvelope } from './types'
+import { Pool, QueryResult } from "pg"
+import { ITileCoord, ITileEnvelope } from "./types"
 
 export class Tileserver {
     pool: Pool
 
-    constructor(connection: PoolConfig) {
-        this.pool = new Pool(connection)
+    constructor(pool: Pool) {
+        this.pool = pool
     }
 
     private _validateTileCoords(coord: ITileCoord): boolean {
