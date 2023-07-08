@@ -3,9 +3,9 @@ import { Pool, QueryResult } from 'pg';
 interface IConnection {
     user: string
     host: string
-    database?: string
+    database: string
     password?: string
-    port?: number
+    port: number
 }
 
 interface ITileCoord {
