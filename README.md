@@ -12,6 +12,7 @@ A drop in vector tile service using pg for turning any postres nackend into a ti
 
 ```javascript
 import { Tileserver } from "dropin-tileservice"
+import { Pool } from "pg"
 
 const connection_params = {
     user: "postgres",
@@ -21,5 +22,7 @@ const connection_params = {
     port: 5432
 }
 
-const tileService = new Tileserver(connection_params)
+const pool = new Pool(connection_params)
+
+const tileService = new Tileserver(pool)
 ```
