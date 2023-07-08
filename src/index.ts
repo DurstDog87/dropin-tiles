@@ -1,12 +1,4 @@
-import { Pool, QueryResult } from 'pg';
-
-interface IConnection {
-    user: string
-    host: string
-    database: string
-    password?: string
-    port: number
-}
+import { Pool, QueryResult, PoolConfig } from 'pg';
 
 interface ITileCoord {
     z: number
@@ -24,18 +16,18 @@ interface ITileEnvelope {
 export class Tileserver {
     pool: Pool
 
-    constructor(connection: IConnection) {
+    constructor(connection: PoolConfig) {
         this.pool = new Pool(connection)
     }
 
-    private _validateTileCoords(z: number, x: number, y: number): boolean {
-        const tileSize = 2**z
+    private _validateTileCoords(coord: ITileCoord): boolean {
+        const tileSize = 2**coord.z
 
-        if( x<=0 || y<=0 || z<0) {
+        if( coord.x<=0 || coord.y<=0 || coord.z<0) {
             return false
         }
 
-        if(x >= tileSize || y >= tileSize) {
+        if(coord.x >= tileSize || coord.y >= tileSize) {
             return false
         }
 
@@ -65,12 +57,12 @@ export class Tileserver {
         const query = ``
         const conn = await this.pool.connect()
 
-        if (!this._validateTileCoords(tileCoord.z, tileCoord.x, tileCoord.y)) {
+        if (!this._validateTileCoords(tileCoord)) {
             throw Error("Invalid tile coordinates")
         }
 
         try{
-            const result: QueryResult = await conn.query(query, params)
+            const result: QueryResult<{mvt:BinaryData}> = await conn.query(query, params)
             return result.rows[0].mvt
         } catch(e) {
             throw e
