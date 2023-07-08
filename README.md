@@ -1,4 +1,4 @@
-# Drop In Tiles
+# Drop In Tileservice
 
 A drop in vector tile service using pg for turning any postres nackend into a tileserver.
 
@@ -8,3 +8,18 @@ A drop in vector tile service using pg for turning any postres nackend into a ti
 - This Package uses the [node-postgres](https://node-postgres.com/)
 
 
+### Usage:
+
+```javascript
+import { Tileserver } from "dropin-tileservice"
+
+const connection_params = {
+    user: "postgres",
+    host: "localhost",
+    database: "features",
+    password: "secret-password", //optional
+    port: 5432
+}
+
+const tileService = new Tileserver(connection_params)
+```
