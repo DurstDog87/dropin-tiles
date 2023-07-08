@@ -11,7 +11,7 @@ export class Tileserver {
     private _validateTileCoords(coord: ITileCoord): boolean {
         const tileSize = 2**coord.z
 
-        if( coord.x<=0 || coord.y<=0 || coord.z<0) {
+        if(coord.x<0 || coord.y<0 || coord.z<0) {
             return false
         }
 

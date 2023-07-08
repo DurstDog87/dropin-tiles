@@ -1,6 +1,6 @@
 # Drop In Tileservice
 
-A drop in vector tile service using pg for turning any postres nackend into a tileserver.
+A drop in vector tile service using pg for turning any postres backend into a tileserver.
 
 ### Pre Requisites:
 
