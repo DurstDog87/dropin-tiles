@@ -1,17 +1,5 @@
-import { Pool, QueryResult, PoolConfig } from 'pg';
-
-interface ITileCoord {
-    z: number
-    x: number
-    y: number
-}
-
-interface ITileEnvelope {
-    xMin: number
-    xMax: number
-    yMin: number
-    yMax: number
-}
+import { Pool, QueryResult, PoolConfig } from 'pg'
+import { ITileCoord, ITileEnvelope } from './types'
 
 export class Tileserver {
     pool: Pool
