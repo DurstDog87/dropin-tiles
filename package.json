@@ -13,6 +13,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/pg": "^8.10.2",
+    "dotenv": "^16.3.1",
     "eslint": "^8.44.0",
     "prettier": "^3.0.0",
     "tslint": "^6.1.3",
