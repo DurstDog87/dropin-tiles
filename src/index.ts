@@ -56,7 +56,7 @@ export class Tileserver {
                     ${bounds.xMax},
                     ${bounds.yMax},
                     3857
-                )) AS mvtgeom
+                )) AS mvtgeom, *
             FROM (${queryString}) AS dat
             WHERE ST_Intersects(geom, ST_Transform(ST_MakeEnvelope(
                 ${bounds.xMin},
