@@ -71,8 +71,7 @@ export class Tileserver {
 
         const query = `
         WITH mvtgeom AS (
-            SELECT 
-                ST_AsMVTGeom(ST_Transform(geom, 3857), ST_MakeEnvelope(
+            SELECT ST_AsMVTGeom(ST_Transform(geom, 3857), ST_MakeEnvelope(
                     ${bounds.xMin},
                     ${bounds.yMin},
                     ${bounds.xMax},
@@ -88,8 +87,7 @@ export class Tileserver {
                 3857
             ), ${srid}))
         )
-        SELECT ST_AsMVT(mvtgeom.*) AS mvt
-        FROM mvtgeom;
+        SELECT ST_AsMVT(mvtgeom.*) AS mvt FROM mvtgeom;
         `
         const conn = await this.pool.connect()
 
