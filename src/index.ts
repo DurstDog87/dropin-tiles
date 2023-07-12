@@ -1,5 +1,6 @@
 import { Pool, QueryResult } from "pg"
 import { ITileCoord, ITileEnvelope } from "./types"
+import { tileExt } from "./util/tile"
 
 export class Tileserver {
     pool: Pool
@@ -9,16 +10,15 @@ export class Tileserver {
     }
 
     private _validateTileCoords(coord: ITileCoord): boolean {
-        const tileSize = 2**coord.z
+        const tileSize = tileExt(coord.z)
 
         if(coord.x<0 || coord.y<0 || coord.z<0) {
             return false
         }
-
+        
         if(coord.x >= tileSize || coord.y >= tileSize) {
             return false
         }
-
         return true
     }
     
@@ -28,7 +28,7 @@ export class Tileserver {
         const webMercMin = -1 * webMercMax
         const worldSize = webMercMax - webMercMin
         //bbox width in tiles
-        const tileSize = 2**coord.z
+        const tileSize = tileExt(coord.z)
         //bbox width in EPSG:3857
         const tileMercSize = worldSize / tileSize
 
@@ -41,7 +41,7 @@ export class Tileserver {
         return result
     }
 
-    async query(queryString: string, params: Array<string | number>, tileCoord: ITileCoord): Promise<BinaryData | undefined> {
+    async query(queryString: string, params: Array<string | number>, tileCoord: ITileCoord): Promise<ArrayBuffer | undefined> {
         const query = ``
         const conn = await this.pool.connect()
 
@@ -50,7 +50,7 @@ export class Tileserver {
         }
 
         try{
-            const result: QueryResult<{mvt:BinaryData}> = await conn.query(query, params)
+            const result: QueryResult<{mvt:ArrayBuffer}> = await conn.query(query, params)
             return result.rows[0].mvt
         } catch(e) {
             throw e
