@@ -1,29 +1,33 @@
 import { Pool, QueryResult } from "pg"
 import { ITileCoord, ITileEnvelope } from "./types"
-import { tileExt } from "./util/tile"
+import { nTiles, tileExt } from "./util/tile"
+
+declare const DEFAULT_SRID = 4296
 
 export class Tileserver {
-    pool: Pool
+    declare pool: Pool
+    declare queryString: string
+    declare srid: number
 
     constructor(pool: Pool) {
-        this.pool = pool
+        this.pool = pool 
+        this.srid = DEFAULT_SRID
     }
 
     private _validateTileCoords(coord: ITileCoord): boolean {
         const tileSize = tileExt(coord.z)
 
-        if(coord.x<0 || coord.y<0 || coord.z<0) {
+        if(coord.x<=0 || coord.y<=0 || coord.z<0) {
             return false
         }
 
-        if(coord.x >= tileSize || coord.y >= tileSize) {
+        if(coord.x > tileSize || coord.y > tileSize) {
             return false
         }
         return true
     }
     
     private _makeEnvelopeFromTileCoord(coord: ITileCoord): ITileEnvelope {
-        let result: ITileEnvelope
         const webMercMax = 20037508.3427892
         const webMercMin = -1 * webMercMax
         const worldSize = webMercMax - webMercMin
@@ -32,19 +36,37 @@ export class Tileserver {
         //bbox width in EPSG:3857
         const tileMercSize = worldSize / tileSize
 
-        result = {
+        return {
             xMin: webMercMin + tileMercSize * coord.x,
             xMax: webMercMin + tileMercSize * (coord.x + 1),
             yMin: webMercMax + tileMercSize * (coord.y + 1),
             yMax: webMercMax + tileMercSize * coord.y
         }
-        return result
     }
 
-    async query(queryString: string, params: Array<string | number>, tileCoord: ITileCoord, srid: number = 4296): Promise<ArrayBuffer | undefined> {
+    setPool(pool: Pool) {
+        this.pool = pool
+    }
+
+    setQuery(query: string) {
+        this.queryString = query
+    }
+
+    setSrid(srid: number) {
+        this.srid = srid
+    }
+
+    async query(queryString: string = this.queryString, params: Array<string | number>, tileCoord: ITileCoord, srid: number = this.srid): 
+    Promise<ArrayBuffer | undefined> {
+
         if (!this._validateTileCoords(tileCoord)) {
             throw Error("Invalid tile coordinates")
         }
+
+        if(!queryString){
+            throw ReferenceError("no query string set")
+        }
+
         const bounds = this._makeEnvelopeFromTileCoord(tileCoord)
 
         const query = `
