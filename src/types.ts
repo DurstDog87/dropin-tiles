@@ -11,7 +11,7 @@ export interface ITileEnvelope {
     yMax: number
 }
 
-export interface queryInput {
+export interface IQueryInput {
     queryString?: string
     params?: Array<string | number>
     z?: number

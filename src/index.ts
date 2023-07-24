@@ -1,5 +1,5 @@
 import { Pool, QueryResult } from "pg"
-import { ITileCoord, ITileEnvelope, queryInput } from "./types"
+import { ITileCoord, ITileEnvelope, IQueryInput } from "./types"
 import { nTiles, tileExt } from "./util/tile"
 
 export declare const DEFAULT_SRID = 4296
@@ -58,7 +58,7 @@ export class Tileserver {
 
     
 
-    async query({queryString=this.queryString, params=[], z, x, y, srid}: queryInput={}):
+    async query({queryString=this.queryString, params=[], z, x, y, srid}: IQueryInput={}):
     Promise<ArrayBuffer | undefined> {
 
         if (z==undefined || x===undefined || y===undefined) {
