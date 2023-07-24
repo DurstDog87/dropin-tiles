@@ -1,8 +1,8 @@
 import { Pool, QueryResult } from "pg"
-import { ITileCoord, ITileEnvelope } from "./types"
+import { ITileCoord, ITileEnvelope, queryInput } from "./types"
 import { nTiles, tileExt } from "./util/tile"
 
-declare const DEFAULT_SRID = 4296
+export declare const DEFAULT_SRID = 4296
 
 export class Tileserver {
     declare pool: Pool
@@ -56,15 +56,23 @@ export class Tileserver {
         this.srid = srid
     }
 
-    async query(queryString: string = this.queryString, params: Array<string | number>, tileCoord: ITileCoord, srid: number = this.srid): 
+    
+
+    async query({queryString=this.queryString, params=[], z, x, y, srid}: queryInput={}):
     Promise<ArrayBuffer | undefined> {
 
+        if (z==undefined || x===undefined || y===undefined) {
+            throw EvalError("tile coordinates not defined")
+        }
+
+        const tileCoord: ITileCoord = {z: z, x: x, y: y}
+
         if (!this._validateTileCoords(tileCoord)) {
-            throw Error("Invalid tile coordinates")
+            throw EvalError("Invalid tile coordinates")
         }
 
         if(!queryString){
-            throw ReferenceError("no query string set")
+            throw EvalError("no query string set")
         }
 
         const bounds = this._makeEnvelopeFromTileCoord(tileCoord)
