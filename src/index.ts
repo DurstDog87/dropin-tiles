@@ -56,8 +56,6 @@ export class Tileserver {
         this.srid = srid
     }
 
-    
-
     async query({queryString=this.queryString, params=[], z, x, y, srid}: IQueryInput={}):
     Promise<ArrayBuffer | undefined> {
 
