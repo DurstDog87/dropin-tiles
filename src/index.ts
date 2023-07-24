@@ -1,8 +1,8 @@
 import { Pool, QueryResult } from "pg"
-import { ITileCoord, ITileEnvelope } from "./types"
+import { ITileCoord, ITileEnvelope, IQueryInput } from "./types"
 import { nTiles, tileExt } from "./util/tile"
 
-declare const DEFAULT_SRID = 4296
+export declare const DEFAULT_SRID = 4296
 
 export class Tileserver {
     declare pool: Pool
@@ -56,23 +56,30 @@ export class Tileserver {
         this.srid = srid
     }
 
-    async query(queryString: string = this.queryString, params: Array<string | number>, tileCoord: ITileCoord, srid: number = this.srid): 
+    
+
+    async query({queryString=this.queryString, params=[], z, x, y, srid}: IQueryInput={}):
     Promise<ArrayBuffer | undefined> {
 
+        if (z==undefined || x===undefined || y===undefined) {
+            throw EvalError("tile coordinates not defined")
+        }
+
+        const tileCoord: ITileCoord = {z: z, x: x, y: y}
+
         if (!this._validateTileCoords(tileCoord)) {
-            throw Error("Invalid tile coordinates")
+            throw EvalError("Invalid tile coordinates")
         }
 
         if(!queryString){
-            throw ReferenceError("no query string set")
+            throw EvalError("no query string set")
         }
 
         const bounds = this._makeEnvelopeFromTileCoord(tileCoord)
 
         const query = `
         WITH mvtgeom AS (
-            SELECT 
-                ST_AsMVTGeom(ST_Transform(geom, 3857), ST_MakeEnvelope(
+            SELECT ST_AsMVTGeom(ST_Transform(geom, 3857), ST_MakeEnvelope(
                     ${bounds.xMin},
                     ${bounds.yMin},
                     ${bounds.xMax},
@@ -88,8 +95,7 @@ export class Tileserver {
                 3857
             ), ${srid}))
         )
-        SELECT ST_AsMVT(mvtgeom.*) AS mvt
-        FROM mvtgeom;
+        SELECT ST_AsMVT(mvtgeom.*) AS mvt FROM mvtgeom;
         `
         const conn = await this.pool.connect()
 
