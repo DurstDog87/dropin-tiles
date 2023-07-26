@@ -1,8 +1,7 @@
 import { Pool, QueryResult } from "pg"
-import { ITileCoord, ITileEnvelope, IQueryInput } from "./types"
-import { nTiles, tileExt } from "./util/tile"
+import { ITileCoord, IQueryInput } from "./types"
 
-export declare const DEFAULT_SRID = 4296
+export declare const DEFAULT_SRID = 4269
 
 export class Tileserver {
     declare pool: Pool
@@ -12,36 +11,6 @@ export class Tileserver {
     constructor(pool: Pool) {
         this.pool = pool 
         this.srid = DEFAULT_SRID
-    }
-
-    private _validateTileCoords(coord: ITileCoord): boolean {
-        const tileSize = tileExt(coord.z)
-
-        if(coord.x<=0 || coord.y<=0 || coord.z<0) {
-            return false
-        }
-
-        if(coord.x > tileSize || coord.y > tileSize) {
-            return false
-        }
-        return true
-    }
-    
-    private _makeEnvelopeFromTileCoord(coord: ITileCoord): ITileEnvelope {
-        const webMercMax = 20037508.3427892
-        const webMercMin = -1 * webMercMax
-        const worldSize = webMercMax - webMercMin
-        //bbox width in tiles
-        const tileSize = tileExt(coord.z)
-        //bbox width in EPSG:3857
-        const tileMercSize = worldSize / tileSize
-
-        return {
-            xMin: webMercMin + tileMercSize * coord.x,
-            xMax: webMercMin + tileMercSize * (coord.x + 1),
-            yMin: webMercMax + tileMercSize * (coord.y + 1),
-            yMax: webMercMax + tileMercSize * coord.y
-        }
     }
 
     setPool(pool: Pool) {
@@ -56,9 +25,7 @@ export class Tileserver {
         this.srid = srid
     }
 
-    
-
-    async query({queryString=this.queryString, params=[], z, x, y, srid}: IQueryInput={}):
+    async query({queryString=this.queryString, params=[], z, x, y, srid=this.srid}: IQueryInput={}):
     Promise<ArrayBuffer | undefined> {
 
         if (z==undefined || x===undefined || y===undefined) {
@@ -67,32 +34,18 @@ export class Tileserver {
 
         const tileCoord: ITileCoord = {z: z, x: x, y: y}
 
-        if (!this._validateTileCoords(tileCoord)) {
-            throw EvalError("Invalid tile coordinates")
-        }
-
         if(!queryString){
             throw EvalError("no query string set")
         }
 
-        const bounds = this._makeEnvelopeFromTileCoord(tileCoord)
-
         const query = `
         WITH mvtgeom AS (
-            SELECT ST_AsMVTGeom(ST_Transform(geom, 3857), ST_MakeEnvelope(
-                    ${bounds.xMin},
-                    ${bounds.yMin},
-                    ${bounds.xMax},
-                    ${bounds.yMax},
-                    3857
+            SELECT ST_AsMVTGeom(ST_Transform(geom, 3857), ST_TileEnvelope(
+                    ${tileCoord.z},${tileCoord.x},${tileCoord.y}
                 )) AS mvtgeom, *
-            FROM (${queryString}) AS dat
-            WHERE ST_Intersects(geom, ST_Transform(ST_MakeEnvelope(
-                ${bounds.xMin},
-                ${bounds.yMin},
-                ${bounds.xMax},
-                ${bounds.yMax},
-                3857
+            FROM (${queryString.replace(/;$/g, "")}) AS dat
+            WHERE ST_Intersects(geom, ST_Transform(ST_TileEnvelope(
+                    ${tileCoord.z},${tileCoord.x},${tileCoord.y}
             ), ${srid}))
         )
         SELECT ST_AsMVT(mvtgeom.*) AS mvt FROM mvtgeom;
