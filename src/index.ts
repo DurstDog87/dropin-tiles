@@ -43,7 +43,7 @@ export class Tileserver {
             SELECT ST_AsMVTGeom(ST_Transform(geom, 3857), ST_TileEnvelope(
                     ${tileCoord.z},${tileCoord.x},${tileCoord.y}
                 )) AS mvtgeom, *
-            FROM (${queryString}) AS dat
+            FROM (${queryString.replace(/;$/g, "")}) AS dat
             WHERE ST_Intersects(geom, ST_Transform(ST_TileEnvelope(
                     ${tileCoord.z},${tileCoord.x},${tileCoord.y}
             ), ${srid}))
