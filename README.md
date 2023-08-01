@@ -9,7 +9,9 @@ A drop in vector tile service using pg for turning any postres backend into a ti
 
 ### Installation 
 
-Clone this repo then run `npm install path/to/repo`
+- Clone this repo then build using `npm run build` at the root
+- Install in your application with `npm install path/to/repo`
+- Link with `npm link path/to/repo`
 
 ### Usage: (Express example)
 
