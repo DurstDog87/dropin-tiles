@@ -2,7 +2,7 @@
   "name": "dropin-tileservice",
   "version": "1.0.0",
   "description": "A minimal drop in vector tile service using pg",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
