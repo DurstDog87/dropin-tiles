@@ -7,12 +7,21 @@ A drop in vector tile service using pg for turning any postres backend into a ti
 - [PostgreSQL](https://www.postgresql.org/) with [PostGIS](http://postgis.net/) installed.
 - This Package requires the [node-postgres](https://node-postgres.com/) package
 
+### Installation 
 
-### Usage:
+Clone this repo then run `npm install path/to/repo`
+
+### Usage: (Express example)
 
 ```javascript
 import { Tileserver } from "dropin-tileservice"
 import { Pool } from "pg"
+import Express from "express"
+
+const all = Express()
+const port = 5000
+
+app.use(cors())
 
 const connection_params = {
     user: "postgres",
@@ -25,4 +34,62 @@ const connection_params = {
 const pool = new Pool(connection_params)
 
 const tileService = new Tileserver(pool)
+//SQL to be run against the pool db
+tileservice.setQuery("SELECT id, geom FROM schema.table WHERE prop = 44") 
+tileservice.setSrid(2252) //Michigan Central
+
+app.get("/tiles/:z/:x/:y", async (req, res) => {
+    try {
+        const tiles = await ts.query({ // returns a protobuf containing tile geometries and properties
+            z: req.params.z,
+            x: req.params.x,
+            y: req.params.y
+        })
+        res.status(200).send(tiles) //protobuf sent as result 
+    } catch (e) {
+        console.log(e)
+    }
+
+})
+
+```
+
+### With Params
+```javascript
+tileservice.setQuery("SELECT id, geom FROM schema.table WHERE prop = $1") 
+tileservice.setSrid(2252) //Michigan Central
+
+app.get("/tiles/:z/:x/:y", async (req, res) => {
+    try {
+        const tiles = await ts.query({ // returns a protobuf containing tile geometries and properties
+            z: req.params.z,
+            x: req.params.x,
+            y: req.params.y,
+            params: [44]
+        })
+        res.status(200).send(tiles) //protobuf sent as result 
+    } catch (e) {
+        console.log(e)
+    }
+})
+```
+
+### Passing queryString and srid
+
+```javascript
+app.get("/tiles/:z/:x/:y", async (req, res) => {
+    try {
+        const tiles = await ts.query({ // returns a protobuf containing tile geometries and properties
+            queryString: "SELECT id, geom FROM schema.table WHERE prop = $1",
+            srid: 2252,
+            z: req.params.z,
+            x: req.params.x,
+            y: req.params.y,
+            params: [44]
+        })
+        res.status(200).send(tiles) //protobuf sent as result 
+    } catch (e) {
+        console.log(e)
+    }
+})
 ```
