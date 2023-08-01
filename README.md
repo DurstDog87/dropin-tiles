@@ -1,4 +1,4 @@
-# Drop In Tileservice
+ # Drop In Tileservice
 
 A drop in vector tile service using pg for turning any postres backend into a tileserver.
 
@@ -20,7 +20,7 @@ import { Tileserver } from "dropin-tileservice"
 import { Pool } from "pg"
 import Express from "express"
 
-const all = Express()
+const app = Express()
 const port = 5000
 
 app.use(cors())
