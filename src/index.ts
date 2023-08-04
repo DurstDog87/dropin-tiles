@@ -25,7 +25,7 @@ export class Tileserver {
         this.srid = srid
     }
 
-    async query({queryString=this.queryString, params=[], z, x, y, srid=this.srid}: IQueryInput={}):
+    async query({queryString=this.queryString, params=[], z, x, y, srid=this.srid, layerName="default"}: IQueryInput={}):
     Promise<ArrayBuffer | undefined> {
 
         if (z==undefined || x===undefined || y===undefined) {
@@ -42,13 +42,13 @@ export class Tileserver {
         WITH mvtgeom AS (
             SELECT ST_AsMVTGeom(ST_Transform(geom, 3857), ST_TileEnvelope(
                     ${tileCoord.z},${tileCoord.x},${tileCoord.y}
-                )) AS mvtgeom, *
+                ), 4096, 256, true) AS mvtgeom, dat.*
             FROM (${queryString.replace(/;$/g, "")}) AS dat
             WHERE ST_Intersects(geom, ST_Transform(ST_TileEnvelope(
                     ${tileCoord.z},${tileCoord.x},${tileCoord.y}
             ), ${srid}))
         )
-        SELECT ST_AsMVT(mvtgeom.*) AS mvt FROM mvtgeom;
+        SELECT ST_AsMVT(mvtgeom.*, '${layerName}') AS mvt FROM mvtgeom;
         `
         const conn = await this.pool.connect()
 

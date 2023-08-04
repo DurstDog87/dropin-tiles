@@ -18,5 +18,6 @@ export interface IQueryInput {
     x?: number
     y?: number
     srid?: number
-
+    layerName?: string
+    description?: string
 }
