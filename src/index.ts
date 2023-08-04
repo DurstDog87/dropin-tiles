@@ -38,7 +38,7 @@ export class Tileserver {
     async query(z:number, y:number, x:number, options: IQueryOptions = {}):
     Promise<ArrayBuffer | undefined> {
 
-        if (z==undefined || x===undefined || y===undefined) {
+        if (z===undefined || x===undefined || y===undefined) {
             throw EvalError("tile coordinates not defined")
         }
 
@@ -51,9 +51,9 @@ export class Tileserver {
             SELECT ST_AsMVTGeom(
                 ST_Transform(geom, 3857), 
                 ST_TileEnvelope(${z},${x},${y}), 
-                extent=>${options.extent||this.extent},
-                buffer=>${options.buffer||this.buffer},
-                clip_geom=>${options.clip_geom||this.clip_geom}
+                ${options.extent||this.extent},
+                ${options.buffer||this.buffer},
+                ${options.clip_geom||this.clip_geom}
                 ) AS mvtgeom, dat.*
             FROM (${(options.queryString||this.queryString).replace(/;$/g, "")}) AS dat
             WHERE ST_Intersects(
@@ -62,9 +62,6 @@ export class Tileserver {
         )
         SELECT ST_AsMVT(mvtgeom.*, '${options.layerName||"default"}') AS mvt FROM mvtgeom;
         `
-        console.log(this.extent,this.buffer,this.clip_geom)
-        console.log(query)
-        console.log(options.params)
         const conn = await this.pool.connect()
 
         try{
