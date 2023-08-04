@@ -11,13 +11,12 @@ export interface ITileEnvelope {
     yMax: number
 }
 
-export interface IQueryInput {
+export interface IQueryOptions {
     queryString?: string
     params?: Array<string | number>
-    z?: number
-    x?: number
-    y?: number
     srid?: number
     layerName?: string
-    description?: string
+    extent?: number
+    buffer?: number
+    clip_geom?: boolean
 }
