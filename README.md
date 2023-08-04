@@ -45,7 +45,8 @@ app.get("/tiles/:z/:x/:y", async (req, res) => {
         const tiles = await ts.query({ // returns a protobuf containing tile geometries and properties
             z: req.params.z,
             x: req.params.x,
-            y: req.params.y
+            y: req.params.y,
+            layerName: "my_layer"
         })
         res.status(200).send(tiles) //protobuf sent as result 
     } catch (e) {
@@ -67,7 +68,8 @@ app.get("/tiles/:z/:x/:y", async (req, res) => {
             z: req.params.z,
             x: req.params.x,
             y: req.params.y,
-            params: [44]
+            params: [44], 
+            layerName: "my_layer"
         })
         res.status(200).send(tiles) //protobuf sent as result 
     } catch (e) {
@@ -87,7 +89,8 @@ app.get("/tiles/:z/:x/:y", async (req, res) => {
             z: req.params.z,
             x: req.params.x,
             y: req.params.y,
-            params: [44]
+            params: [44], 
+            layerName: "my_layer"
         })
         res.status(200).send(tiles) //protobuf sent as result 
     } catch (e) {
