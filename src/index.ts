@@ -1,5 +1,5 @@
 import { Pool, QueryResult } from "pg"
-import { ITileCoord, IQueryOptions } from "./types"
+import { IQueryOptions } from "./types"
 
 export const DEFAULT_SRID = 4269
 export const DEFAULT_EXTENT = 4096
@@ -35,7 +35,7 @@ export class Tileserver {
         this.srid = srid
     }
 
-    async query(z:number, y:number, x:number, options: IQueryOptions = {}):
+    async query(z:number, x:number, y:number, options: IQueryOptions = {}):
     Promise<ArrayBuffer | undefined> {
 
         if (z===undefined || x===undefined || y===undefined) {
@@ -51,22 +51,22 @@ export class Tileserver {
             SELECT ST_AsMVTGeom(
                 ST_Transform(geom, 3857), 
                 ST_TileEnvelope(${z},${x},${y}), 
-                ${options.extent||this.extent},
-                ${options.buffer||this.buffer},
-                ${options.clip_geom||this.clip_geom}
+                ${options.extent??this.extent},
+                ${options.buffer??this.buffer},
+                ${options.clip_geom??this.clip_geom}
                 ) AS mvtgeom, dat.*
-            FROM (${(options.queryString||this.queryString).replace(/;$/g, "")}) AS dat
+            FROM (${(options.queryString??this.queryString).replace(/;$/g, "")}) AS dat
             WHERE ST_Intersects(
                 geom, 
-                ST_Transform(ST_TileEnvelope(${z},${x},${y}), ${options.srid||this.srid}))
+                ST_Transform(ST_TileEnvelope(${z},${x},${y}), ${options.srid??this.srid}))
         )
-        SELECT ST_AsMVT(mvtgeom.*, '${options.layerName||"default"}') AS mvt FROM mvtgeom;
+        SELECT ST_AsMVT(mvtgeom.*, '${options.layerName??"default"}') AS mvt FROM mvtgeom;
         `
+
         const conn = await this.pool.connect()
 
         try{
-            const result: QueryResult<{mvt:ArrayBuffer}> = await conn.query(query, options.params||[])
-            console.log(result.rows[0].mvt)
+            const result: QueryResult<{mvt:ArrayBuffer}> = await conn.query(query, options.params??[])
             return result.rows[0].mvt
         } catch(e) {
             throw e
