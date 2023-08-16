@@ -42,11 +42,8 @@ tileservice.setSrid(2252) //Michigan Central
 
 app.get("/tiles/:z/:x/:y", async (req, res) => {
     try {
-        const tiles = await ts.query({ // returns a protobuf containing tile geometries and properties
-            z: req.params.z,
-            x: req.params.x,
-            y: req.params.y,
-            layerName: "my_layer"
+        const tiles = await ts.query(req.params.z, req.params.x, req.params.y, {
+            layername: "my_layer"
         })
         res.status(200).send(tiles) //protobuf sent as result 
     } catch (e) {
@@ -64,12 +61,9 @@ tileservice.setSrid(2252) //Michigan Central
 
 app.get("/tiles/:z/:x/:y", async (req, res) => {
     try {
-        const tiles = await ts.query({ // returns a protobuf containing tile geometries and properties
-            z: req.params.z,
-            x: req.params.x,
-            y: req.params.y,
-            params: [44], 
-            layerName: "my_layer"
+        const tiles = await ts.query(req.params.z, req.params.x, req.params.y, {
+            params: [44],
+            layername: "my_layer"
         })
         res.status(200).send(tiles) //protobuf sent as result 
     } catch (e) {
@@ -83,14 +77,11 @@ app.get("/tiles/:z/:x/:y", async (req, res) => {
 ```javascript
 app.get("/tiles/:z/:x/:y", async (req, res) => {
     try {
-        const tiles = await ts.query({ // returns a protobuf containing tile geometries and properties
+        const tiles = await ts.query(req.params.z, req.params.x, req.params.y, {
             queryString: "SELECT id, geom FROM schema.table WHERE prop = $1",
             srid: 2252,
-            z: req.params.z,
-            x: req.params.x,
-            y: req.params.y,
-            params: [44], 
-            layerName: "my_layer"
+            params: [44],
+            layername: "my_layer"
         })
         res.status(200).send(tiles) //protobuf sent as result 
     } catch (e) {
