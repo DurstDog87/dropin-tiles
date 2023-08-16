@@ -42,7 +42,7 @@ export class Tileserver {
             throw EvalError("tile coordinates not defined")
         }
 
-        if(!this.queryString && !options.queryString){
+        if(!this.queryString && !options.queryString) {
             throw EvalError("no query string set")
         }
 
