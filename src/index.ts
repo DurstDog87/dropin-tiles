@@ -36,7 +36,7 @@ export class Tileserver {
     }
 
     async query(z:number, x:number, y:number, options: IQueryOptions = {}):
-    Promise<ArrayBuffer | undefined> {
+    Promise<ArrayBuffer> {
 
         if (z===undefined || x===undefined || y===undefined) {
             throw EvalError("tile coordinates not defined")
