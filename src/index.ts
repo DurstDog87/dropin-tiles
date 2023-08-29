@@ -39,11 +39,11 @@ export class Tileserver {
     Promise<ArrayBuffer> {
 
         if (z===undefined || x===undefined || y===undefined) {
-            throw EvalError("tile coordinates not defined")
+            throw new EvalError("tile coordinates not defined")
         }
 
         if(!this.queryString && !options.queryString) {
-            throw EvalError("no query string set")
+            throw new EvalError("no query string set")
         }
 
         const query = `
