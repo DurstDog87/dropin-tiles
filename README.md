@@ -43,7 +43,7 @@ tileservice.setSrid(2252) //Michigan Central
 app.get("/tiles/:z/:x/:y", async (req, res) => {
     try {
         const tiles = await ts.query(req.params.z, req.params.x, req.params.y, {
-            layername: "my_layer"
+            layername: "default"
         })
         res.status(200).send(tiles) //protobuf sent as result 
     } catch (e) {
@@ -63,7 +63,7 @@ app.get("/tiles/:z/:x/:y", async (req, res) => {
     try {
         const tiles = await ts.query(req.params.z, req.params.x, req.params.y, {
             params: [44],
-            layername: "my_layer"
+            layername: "default"
         })
         res.status(200).send(tiles) //protobuf sent as result 
     } catch (e) {
@@ -81,7 +81,7 @@ app.get("/tiles/:z/:x/:y", async (req, res) => {
             queryString: "SELECT id, geom FROM schema.table WHERE prop = $1",
             srid: 2252,
             params: [44],
-            layername: "my_layer"
+            layername: "default"
         })
         res.status(200).send(tiles) //protobuf sent as result 
     } catch (e) {
