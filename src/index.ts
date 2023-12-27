@@ -12,8 +12,7 @@ export class Tileserver {
   extent: number;
   buffer: number;
   clip_geom: boolean;
-
-  declare queryString: string;
+  queryString: string;
 
   constructor(pool: Pool) {
     this.pool = pool;
@@ -21,6 +20,7 @@ export class Tileserver {
     this.extent = DEFAULT_EXTENT;
     this.buffer = DEFAULT_BUFFER;
     this.clip_geom = DEFAULT_CLIP_GEOM;
+    this.queryString = '';
   }
 
   setPool(pool: Pool) {
