@@ -1,4 +1,4 @@
-import { ITileCoord, ITileEnvelope } from '../types';
+import { ITileEnvelope } from '../types';
 
 export function tileExt(zoom: number): number {
   //tile width at zoom level `zoom`
@@ -22,19 +22,19 @@ export function makeEnvelopeFromTileCoord(z: number, x: number, y: number): ITil
   return {
     xMin: webMercMin + tileMercSize * x,
     xMax: webMercMin + tileMercSize * (x + 1),
-    yMin: webMercMax + tileMercSize * (y + 1),
-    yMax: webMercMax + tileMercSize * y,
+    yMin: webMercMax - tileMercSize * (y + 1),
+    yMax: webMercMax - tileMercSize * y,
   };
 }
 
-export function validateTileCoords(coord: ITileCoord): boolean {
-  const tileSize = tileExt(coord.z);
+export function validateTileCoords(z: number, x: number, y: number): boolean {
+  const tileSize = tileExt(z);
 
-  if (coord.x <= 0 || coord.y <= 0 || coord.z < 0) {
+  if (x < 0 || y < 0 || z < 0) {
     return false;
   }
 
-  if (coord.x > tileSize || coord.y > tileSize) {
+  if (x >= tileSize || y >= tileSize) {
     return false;
   }
   return true;
