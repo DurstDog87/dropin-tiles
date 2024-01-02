@@ -1,5 +1,6 @@
 import { Pool, QueryResult } from 'pg';
 import { IQueryOptions } from './types';
+import { makeBboxFromTileCoord } from './util/tile';
 
 export const DEFAULT_SRID = 4269;
 export const DEFAULT_EXTENT = 4096;
@@ -44,11 +45,11 @@ export class Tileserver {
       throw EvalError('no query string set');
     }
 
-    const query = `
+    const query = `--sql
         WITH mvtgeom AS (
             SELECT ST_AsMVTGeom(
                 ST_Transform(geom, 3857), 
-                ST_TileEnvelope($1,$2,$3), 
+                ST_MakeEnvelope($1,$2,$3,$4, 4326), 
                 ${options.extent ?? this.extent},
                 ${options.buffer ?? this.buffer},
                 ${options.clip_geom ?? this.clip_geom}
@@ -56,15 +57,21 @@ export class Tileserver {
             FROM (${(options.queryString ?? this.queryString).replace(/;$/g, '')}) AS dat
             WHERE ST_Intersects(
                 geom, 
-                ST_Transform(ST_TileEnvelope($1,$2,$3), ${options.srid ?? this.srid}))
-        )
+                ST_Transform(ST_MakeEnvelope($1,$2,$3,$4, ${options.srid ?? this.srid}), ${options.srid ?? this.srid})
+        ))
         SELECT ST_AsMVT(mvtgeom.*, '${options.layerName ?? 'default'}') AS mvt FROM mvtgeom;
         `;
 
     const conn = await this.pool.connect();
 
     try {
-      const result: QueryResult<{ mvt: ArrayBuffer }> = await conn.query(query, [z, x, y]);
+      const bbox = makeBboxFromTileCoord(z, x, y);
+      const result: QueryResult<{ mvt: ArrayBuffer }> = await conn.query(query, [
+        bbox.xMin,
+        bbox.yMin,
+        bbox.xMax,
+        bbox.yMax,
+      ]);
       return result.rows[0].mvt;
     } catch (e) {
       throw e;

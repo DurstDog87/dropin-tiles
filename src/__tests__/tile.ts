@@ -1,5 +1,5 @@
 import { describe, expect, test } from '@jest/globals';
-import { tileExt, nTiles, makeEnvelopeFromTileCoord, validateTileCoords } from '../util/tile';
+import { tileExt, nTiles, makeBboxFromTileCoord, validateTileCoords } from '../util/tile';
 
 describe('tile utilities', () => {
   test('find tile extent at given zoom', () => {
@@ -13,7 +13,7 @@ describe('tile utilities', () => {
   });
 
   test('find the envelope for and zxy set', () => {
-    const res = makeEnvelopeFromTileCoord(3, 3, 4);
+    const res = makeBboxFromTileCoord(3, 3, 4);
     expect(res).toStrictEqual({
       xMin: -5009377.085697301,
       xMax: 0.0,

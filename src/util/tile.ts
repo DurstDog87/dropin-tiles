@@ -1,4 +1,4 @@
-import { ITileEnvelope } from '../types';
+import { ITileBbox } from '../types';
 
 export function tileExt(zoom: number): number {
   //tile width at zoom level `zoom`
@@ -10,7 +10,7 @@ export function nTiles(zoom: number): number {
   return 2 ** (2 * zoom);
 }
 
-export function makeEnvelopeFromTileCoord(z: number, x: number, y: number): ITileEnvelope {
+export function makeBboxFromTileCoord(z: number, x: number, y: number): ITileBbox {
   const webMercMax = 20037508.3427892;
   const webMercMin = -1 * webMercMax;
   const worldSize = webMercMax - webMercMin;
