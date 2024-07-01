@@ -43,7 +43,7 @@ tileservice.setSrid(2252) //Michigan Central
 app.get("/tiles/:z/:x/:y", async (req, res) => {
     try {
         const conn = await pool.connect()
-        const tiles = await ts.query(req.params.z, req.params.x, req.params.y, conn {
+        const tiles = await ts.query(req.params.z, req.params.x, req.params.y, conn, {
             layername: "default"
         })
         res.status(200).send(tiles) //protobuf sent as result 
