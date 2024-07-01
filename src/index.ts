@@ -1,4 +1,4 @@
-import { Pool, QueryResult } from 'pg';
+import { Client, Pool, QueryResult } from 'pg';
 import { IQueryOptions } from './types';
 import { makeBboxFromTileCoord } from './util/tile';
 
@@ -8,24 +8,18 @@ export const DEFAULT_BUFFER = 256;
 export const DEFAULT_CLIP_GEOM = true;
 
 export class Tileserver {
-  pool: Pool;
   srid: number;
   extent: number;
   buffer: number;
   clip_geom: boolean;
   queryString: string;
 
-  constructor(pool: Pool) {
-    this.pool = pool;
+  constructor() {
     this.srid = DEFAULT_SRID;
     this.extent = DEFAULT_EXTENT;
     this.buffer = DEFAULT_BUFFER;
     this.clip_geom = DEFAULT_CLIP_GEOM;
     this.queryString = '';
-  }
-
-  setPool(pool: Pool) {
-    this.pool = pool;
   }
 
   setQuery(query: string) {
@@ -36,7 +30,7 @@ export class Tileserver {
     this.srid = srid;
   }
 
-  async query(z: number, x: number, y: number, options: IQueryOptions = {}): Promise<ArrayBuffer> {
+  async query(z: number, x: number, y: number, client: Client, options: IQueryOptions = {}): Promise<ArrayBuffer> {
     if (z === undefined || x === undefined || y === undefined) {
       throw EvalError('tile coordinates not defined');
     }
@@ -62,21 +56,13 @@ export class Tileserver {
         SELECT ST_AsMVT(mvtgeom.*, '${options.layerName ?? 'default'}') AS mvt FROM mvtgeom;
         `;
 
-    const conn = await this.pool.connect();
-
-    try {
-      const bbox = makeBboxFromTileCoord(z, x, y);
-      const result: QueryResult<{ mvt: ArrayBuffer }> = await conn.query(query, [
-        bbox.xMin,
-        bbox.yMin,
-        bbox.xMax,
-        bbox.yMax,
-      ]);
-      return result.rows[0].mvt;
-    } catch (e) {
-      throw e;
-    } finally {
-      conn.release();
-    }
+    const bbox = makeBboxFromTileCoord(z, x, y);
+    const result: QueryResult<{ mvt: ArrayBuffer }> = await client.query(query, [
+      bbox.xMin,
+      bbox.yMin,
+      bbox.xMax,
+      bbox.yMax,
+    ]);
+    return result.rows[0].mvt;
   }
 }
