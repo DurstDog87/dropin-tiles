@@ -1,4 +1,4 @@
-export interface ITileEnvelope {
+export interface ITileBbox {
   xMin: number;
   xMax: number;
   yMin: number;

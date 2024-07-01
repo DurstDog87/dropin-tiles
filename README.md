@@ -1,14 +1,10 @@
-🚧 **work in progress** 🚧 
-#### This project is in active development and not stable
-#### Things might change at any time
- 
  # Drop In Tileservice
 
 A drop in vector tile service using pg for turning any postres backend into a tileserver.
 
 ### Pre Requisites:
 
-- [PostgreSQL](https://www.postgresql.org/) with [PostGIS](http://postgis.net/) installed.
+- [PostgreSQL](https://www.postgresql.org/) with the [PostGIS](http://postgis.net/) extension added.
 - This Package requires the [node-postgres](https://node-postgres.com/) package
 
 ### Installation 
@@ -39,19 +35,22 @@ const connection_params = {
 
 const pool = new Pool(connection_params)
 
-const tileService = new Tileserver(pool)
+const tileService = new Tileserver()
 //SQL to be run against the pool db
 tileservice.setQuery("SELECT id, geom FROM schema.table WHERE prop = 44") 
 tileservice.setSrid(2252) //Michigan Central
 
 app.get("/tiles/:z/:x/:y", async (req, res) => {
     try {
-        const tiles = await ts.query(req.params.z, req.params.x, req.params.y, {
+        const conn = await pool.connect()
+        const tiles = await ts.query(req.params.z, req.params.x, req.params.y, conn, {
             layername: "default"
         })
         res.status(200).send(tiles) //protobuf sent as result 
     } catch (e) {
         console.log(e)
+    } finally {
+        await conn.release()
     }
 
 })
@@ -65,13 +64,16 @@ tileservice.setSrid(2252) //Michigan Central
 
 app.get("/tiles/:z/:x/:y", async (req, res) => {
     try {
-        const tiles = await ts.query(req.params.z, req.params.x, req.params.y, {
+        const conn = await pool.connect()
+        const tiles = await ts.query(req.params.z, req.params.x, req.params.y, conn, {
             params: [44],
             layername: "default"
         })
         res.status(200).send(tiles) //protobuf sent as result 
     } catch (e) {
         console.log(e)
+    } finally {
+        await conn.release()
     }
 })
 ```
@@ -81,7 +83,8 @@ app.get("/tiles/:z/:x/:y", async (req, res) => {
 ```javascript
 app.get("/tiles/:z/:x/:y", async (req, res) => {
     try {
-        const tiles = await ts.query(req.params.z, req.params.x, req.params.y, {
+        const conn = await pool.connect()
+        const tiles = await ts.query(req.params.z, req.params.x, req.params.y, conn, {
             queryString: "SELECT id, geom FROM schema.table WHERE prop = $1",
             srid: 2252,
             params: [44],
@@ -90,6 +93,8 @@ app.get("/tiles/:z/:x/:y", async (req, res) => {
         res.status(200).send(tiles) //protobuf sent as result 
     } catch (e) {
         console.log(e)
+    } finally {
+        await conn.release()
     }
 })
 ```
