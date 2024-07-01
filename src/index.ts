@@ -1,4 +1,4 @@
-import { Client, Pool, QueryResult } from 'pg';
+import { Client, QueryResult } from 'pg';
 import { IQueryOptions } from './types';
 import { makeBboxFromTileCoord } from './util/tile';
 
